@@ -16,41 +16,9 @@ void ImageDrawingArea::resetSelection() {
 bool ImageDrawingArea::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
   resizeImageIfRequired();
 
-  // draw image
-
-  Gdk::Cairo::set_source_pixbuf(cr, scaledImg, 0, 0);
-  cr->rectangle(0, 0, scaledImg->get_width(), scaledImg->get_height());
-  cr->fill();
-
-  // draw cursor position
-
-  cr->set_source_rgba(1, 1, 1, 0.8);
-  std::vector<double> dashPattern = {10, 10};
-  cr->set_dash(dashPattern, 0);
-
-  cr->set_line_width(1);
-
-  cr->move_to(0, y1);
-  cr->line_to(scaledImg->get_width(), y1);
-  cr->stroke();
-
-  cr->move_to(x1, 0);
-  cr->line_to(x1, scaledImg->get_height());
-  cr->stroke();
-
-  // selection
-  if (clickedPoints.size() == 1) {
-    auto& p = clickedPoints[0];
-    auto factor = determineScalingFactor();
-
-    cr->move_to(factor * p.x, factor * p.y);
-    cr->line_to(factor * p.x, y1);
-    cr->stroke();
-
-    cr->move_to(factor * p.x, factor * p.y);
-    cr->line_to(x1, factor * p.y);
-    cr->stroke();
-  }
+  drawImage(cr);
+  drawCursorPosition(cr);
+  drawSelection(cr);
 
   return true;
 }
@@ -117,4 +85,42 @@ bool ImageDrawingArea::on_motion_notify_event(GdkEventMotion* event) {
   }
 
   return false;
+}
+
+void ImageDrawingArea::drawImage(const Cairo::RefPtr<Cairo::Context>& cr) {
+  Gdk::Cairo::set_source_pixbuf(cr, scaledImg, 0, 0);
+  cr->rectangle(0, 0, scaledImg->get_width(), scaledImg->get_height());
+  cr->fill();
+}
+
+void ImageDrawingArea::drawCursorPosition(const Cairo::RefPtr<Cairo::Context>& cr) {
+  cr->set_source_rgba(1, 1, 1, 0.8);
+  std::vector<double> dashPattern = {10, 10};
+  cr->set_dash(dashPattern, 0);
+
+  cr->set_line_width(1);
+
+  cr->move_to(0, y1);
+  cr->line_to(scaledImg->get_width(), y1);
+  cr->stroke();
+
+  cr->move_to(x1, 0);
+  cr->line_to(x1, scaledImg->get_height());
+  cr->stroke();
+}
+
+void ImageDrawingArea::drawSelection(const Cairo::RefPtr<Cairo::Context>& cr) {
+  // selection
+  if (clickedPoints.size() == 1) {
+    auto& p = clickedPoints[0];
+    auto factor = determineScalingFactor();
+
+    cr->move_to(factor * p.x, factor * p.y);
+    cr->line_to(factor * p.x, y1);
+    cr->stroke();
+
+    cr->move_to(factor * p.x, factor * p.y);
+    cr->line_to(x1, factor * p.y);
+    cr->stroke();
+  }
 }

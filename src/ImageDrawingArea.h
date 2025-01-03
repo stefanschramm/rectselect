@@ -32,4 +32,7 @@ private:
   void resizeImageIfRequired();
   Point mapClickToPoint(GdkEventButton* event);
   double determineScalingFactor();
+  void drawImage(const Cairo::RefPtr<Cairo::Context>& cr);
+  void drawCursorPosition(const Cairo::RefPtr<Cairo::Context>& cr);
+  void drawSelection(const Cairo::RefPtr<Cairo::Context>& cr);
 };
