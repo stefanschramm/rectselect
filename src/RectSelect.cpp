@@ -1,4 +1,5 @@
 #include "RectSelect.h"
+#include "gdkmm/pixbuf.h"
 
 #include <iostream>
 
@@ -24,34 +25,48 @@ int RectSelect::run(int argc, char** argv) {
   }
 
   auto gtkApp = Gtk::Application::create("net.stefanschramm.rectselect");
-  auto img = Gdk::Pixbuf::create_from_file(argv[1]);
-  auto area = ImageDrawingArea(img, this);
-  area.show();
 
-  Gtk::Window window;
-  mWindow = &window;
-  window.set_default_size(800, 600);
-  window.fullscreen();
-  window.add(area);
-  window.signal_key_press_event().connect(
-    [&window, &area](GdkEventKey* event) -> bool {
-      switch (event->keyval) {
-        case GDK_KEY_Return:
-          std::cout << "Return" << std::endl;
-          break;
-        case GDK_KEY_Escape:
-          area.resetSelection();
-          break;
-        case 'q':
-          window.close();
-          break;
-        default:
-          break;
-      }
-      return true;
-    },
-    false
-  );
+  try {
 
-  return gtkApp->run(window);
+    auto img = Gdk::Pixbuf::create_from_file(argv[1]);
+    auto area = ImageDrawingArea(img, this);
+    area.show();
+
+    Gtk::Window window;
+    mWindow = &window;
+    window.set_default_size(800, 600);
+    window.fullscreen();
+    window.add(area);
+    window.signal_key_press_event().connect(
+      [&window, &area](GdkEventKey *event) -> bool {
+        switch (event->keyval) {
+          case GDK_KEY_Return:
+            std::cout << "Return" << std::endl;
+            break;
+          case GDK_KEY_Escape:
+            area.resetSelection();
+            break;
+          case 'q':
+            window.close();
+            break;
+          default:
+            break;
+        }
+        return true;
+      },
+      false
+    );
+    return gtkApp->run(window);
+
+  } catch (Glib::FileError const& e) {
+
+    std::cerr << "Input file not found: " << e.what() << std::endl;
+    return EXIT_FAILURE;
+
+  } catch (Gdk::PixbufError const& e) {
+
+    std::cerr << "Input file format error: " << e.what() << std::endl;
+    return EXIT_FAILURE;
+
+  }
 }
